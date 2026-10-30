@@ -743,7 +743,7 @@ let state = 'splash';         // splash | lobby | loading | ready | playing | pa
 let selectedMap = 'erangel', locked = false, fallbackLook = false, gTime = 0;
 
 const isTouchDevice = (('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (window.matchMedia && window.matchMedia('(pointer: coarse)').matches));
-let MP = { socket: null, room: null, playerId: null, mode: 'solo', connected: false, lastSend: 0, remotes: new Map(), serverUrl: 'ws://localhost:8765' };
+let MP = { socket: null, room: null, playerId: null, mode: 'solo', connected: false, lastSend: 0, remotes: new Map(), serverUrl: 'ws:https://shadow-ou2s.onrender.com' };
 function mpStatus(message, good) {
   const el = $('mpStatus'); if (el) { el.textContent = message; el.style.color = good ? '#8ee6a2' : '#ffbd80'; }
 }
