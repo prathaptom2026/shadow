@@ -219,3 +219,9 @@ html,body{width:100%;height:100%;overflow:hidden;background:#05080c;color:#fff;f
   box-shadow: none;
 }
 #prompt b { min-width: 42px; text-align: center; }
+
+/* Room host code is separate from the friend join-code input. */
+.mp-room-code{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.mp-room-code[hidden],.mp-copy[hidden]{display:none!important}
+.mp-copy{border:1px solid rgba(245,166,35,.65);border-radius:4px;background:rgba(245,166,35,.12);color:#ffcf66;font-size:9px;font-weight:900;letter-spacing:.7px;padding:5px 8px;cursor:pointer}
+.mp-copy:hover{background:#f5a623;color:#241600}

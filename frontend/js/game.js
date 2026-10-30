@@ -767,9 +767,20 @@ function mpConnect(mode) {
       let msg; try { msg = JSON.parse(ev.data); } catch (_) { return; }
       if (msg.type === 'room_created' || msg.type === 'room_joined') {
         MP.room = msg.room; MP.playerId = msg.player_id;
-        $('mpRoomCode').textContent = 'ROOM CODE: ' + MP.room;
-        $('mpRoom').value = MP.room;
-        mpStatus('Connected · Room ' + MP.room + ' · Share this code with your friend', true);
+        const codeWrap = $('mpRoomCode');
+        const codeText = $('mpRoomCodeText');
+        const copyButton = $('mpCopyRoom');
+        if (codeWrap) codeWrap.hidden = false;
+        if (codeText) codeText.textContent = 'ROOM CODE: ' + MP.room;
+        if (copyButton) copyButton.hidden = msg.type !== 'room_created';
+        // Keep the join field exclusively for entering another player's code.
+        // A host's newly generated code is shown separately for sharing.
+        if (msg.type === 'room_created') {
+          if ($('mpRoom')) $('mpRoom').value = '';
+          mpStatus('HOSTING ROOM · Share this code with your friend', true);
+        } else {
+          mpStatus('JOINED ROOM · You are connected with the host', true);
+        }
         startMatch();
       } else if (msg.type === 'error') {
         mpStatus(msg.message || 'Multiplayer error', false);
@@ -1533,10 +1544,43 @@ $('startBtn').addEventListener('click', () => {
   $('mpHudStatus').classList.add('hidden');
   audio(); beep(300, 700, 0.2, 0.08, 'sawtooth'); startMatch(); 
 });
-$('mpCreate').addEventListener('click', () => { audio(); mpConnect('create'); });
+$('mpCreate').addEventListener('click', () => {
+  audio();
+  // Creating a room must never pre-fill the JOIN FRIEND field.
+  $('mpRoom').value = '';
+  $('mpRoomCode').hidden = true;
+  $('mpRoomCodeText').textContent = '';
+  $('mpCopyRoom').hidden = true;
+  MP.room = null;
+  mpConnect('create');
+});
 $('mpJoin').addEventListener('click', () => {
   if (!$('mpRoom').value.trim()) { mpStatus('Enter your friend’s room code first', false); return; }
   audio(); mpConnect('join');
+});
+
+$('mpCopyRoom').addEventListener('click', async () => {
+  if (!MP.room) return;
+  const code = MP.room;
+  try {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(code);
+    } else {
+      const temp = document.createElement('textarea');
+      temp.value = code;
+      temp.setAttribute('readonly', '');
+      temp.style.position = 'fixed';
+      temp.style.opacity = '0';
+      document.body.appendChild(temp);
+      temp.select();
+      const copied = document.execCommand('copy');
+      temp.remove();
+      if (!copied) throw new Error('Clipboard unavailable');
+    }
+    mpStatus('ROOM CODE COPIED · Share ' + code + ' with your friend', true);
+  } catch (_) {
+    mpStatus('Room code: ' + code + ' · Copy it manually', true);
+  }
 });
 
 /* ------------------------------ main loop ------------------------------ */
