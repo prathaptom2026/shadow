@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Battle Zone Royale</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<canvas id="c"></canvas>
+
+<!-- 1. SPLASH -->
+<div id="splash" class="screen">
+  <div class="splash-bg"></div>
+  <div class="splash-center">
+    <div class="logo-small">SURVIVE · LOOT · WIN</div>
+    <h1 class="logo">BATTLE<span>ZONE</span></h1>
+    <div class="logo-sub">R O Y A L E</div>
+    <div class="loadbar"><div id="loadfill"></div></div>
+    <div id="loadtxt">Loading assets...</div>
+  </div>
+  <div class="ver">v1.0 · Made with Three.js</div>
+</div>
+
+<!-- 2. LOBBY -->
+<div id="lobby" class="screen hidden">
+  <div class="lb-top">
+    <div class="profile">
+      <div class="avatar">S</div>
+      <div>
+        <input id="pname" value="SURVIVOR" maxlength="12" spellcheck="false">
+        <div class="lvl">LV 42 · SOLO</div>
+      </div>
+    </div>
+    <div class="lb-title">LOBBY</div>
+  </div>
+
+  <div class="lb-left">
+    <div class="lb-label">OUTFIT</div>
+    <div id="outfits">
+      <button class="dot sel" data-i="0" style="background:#3f5a3a" title="Forest"></button>
+      <button class="dot" data-i="1" style="background:#8a6a3a" title="Desert"></button>
+      <button class="dot" data-i="2" style="background:#2f4a78" title="Navy"></button>
+      <button class="dot" data-i="3" style="background:#6b2d2d" title="Crimson"></button>
+    </div>
+  </div>
+
+  <div class="mp-lobby">
+    <div class="mp-heading">PLAY WITH FRIENDS</div>
+    <div class="mp-row">
+      <input id="mpServer" value="ws://localhost:8765" aria-label="Multiplayer server address">
+      <button id="mpCreate" type="button">CREATE ROOM</button>
+    </div>
+    <div class="mp-row">
+      <input id="mpRoom" maxlength="6" placeholder="ROOM CODE" aria-label="Room code">
+      <button id="mpJoin" type="button">JOIN FRIEND</button>
+    </div>
+    <div id="mpStatus">SOLO MODE · Create a room or join a friend's room</div>
+    <div id="mpRoomCode" class="mp-room-code"></div>
+  </div>
+
+  <div class="lb-bottom">
+    <div class="maps-wrap">
+      <div class="lb-label">SELECT MAP</div>
+      <div id="maps">
+        <div class="mapcard sel" data-map="erangel">
+          <div class="art art-erangel"></div>
+          <div class="mn">ERANGEL</div><div class="ms">Island · Classic pine forest · 6 towns</div><div class="tick">✓</div>
+        </div>
+        <div class="mapcard" data-map="miramar">
+          <div class="art art-miramar"></div>
+          <div class="mn">MIRAMAR</div><div class="ms">Desert · Open ground · Cacti &amp; rocks</div><div class="tick">✓</div>
+        </div>
+        <div class="mapcard" data-map="sanhok">
+          <div class="art art-sanhok"></div>
+          <div class="mn">SANHOK</div><div class="ms">Jungle · Dense trees · Close fights</div><div class="tick">✓</div>
+        </div>
+      </div>
+    </div>
+    <button id="startBtn"><span>START MATCH</span><small id="startSub">ERANGEL · SOLO</small></button>
+  </div>
+</div>
+
+<!-- LOADING -->
+<div id="loading" class="screen hidden">
+  <div class="load-box">
+    <div class="spinner"></div>
+    <div class="load-t">DEPLOYING TO <b id="loadMap">ERANGEL</b></div>
+  </div>
+</div>
+
+<!-- HUD -->
+<div id="hud" class="hidden">
+  <div id="mobileControls" class="mobile-controls" aria-label="Touch controls">
+    <div id="movePad" class="move-pad"><div class="move-ring"><div id="moveStick" class="move-stick"></div></div></div>
+    <div id="lookPad" class="look-pad" aria-hidden="true"></div>
+    <div class="touch-actions">
+      <button class="touch-btn fire" data-action="fire">FIRE</button>
+      <button class="touch-btn aim" data-action="aim">AIM</button>
+      <button class="touch-btn" data-action="jump">JUMP</button>
+      <button class="touch-btn" data-action="crouch">CROUCH</button>
+      <button class="touch-btn" data-action="prone">PRONE</button>
+      <button class="touch-btn" data-action="reload">RELOAD</button>
+      <button class="touch-btn" data-action="pickup">PICK</button>
+      <button class="touch-btn" data-action="weapon">SWAP</button>
+    </div>
+  </div>
+  <div id="rotateNotice" class="rotate-notice">ROTATE YOUR DEVICE TO LANDSCAPE</div>
+  <canvas id="minimap" width="300" height="300"></canvas>
+  <div id="mpHudStatus" class="mp-hud-status hidden">FRIEND ROOM</div>
+  <div id="topinfo">
+    <div class="pill">ALIVE <b id="aliveN">0</b></div>
+    <div class="pill">KILLS <b id="killN">0</b></div>
+  </div>
+  <div id="zoneinfo"></div>
+  <div id="killfeed"></div>
+
+  <div id="crosshair"><i class="ch t"></i><i class="ch b"></i><i class="ch l"></i><i class="ch r"></i><i class="dotc"></i></div>
+  <div id="hitmarker"><i></i><i></i><i></i><i></i></div>
+  <div id="prompt"></div>
+  <div id="stance"></div>
+  <div id="msg"></div>
+
+  <div id="hpwrap">
+    <div class="hpbar"><div id="hpfill"></div></div>
+    <div id="hptxt">100</div>
+  </div>
+  <div id="weapons"></div>
+  <div id="ammo"><div id="wname">UNARMED</div><div id="ammotxt"><b>--</b></div><div id="reload"></div></div>
+
+  <div id="controls">
+    WASD move · SHIFT sprint · SPACE jump · C crouch · Z prone · Q/E peek · F pick up · LMB shoot · RMB scope · R reload · 1/2/3 weapons
+  </div>
+  <div id="hurt"></div>
+  <div id="scope"><span id="zoomtxt"></span></div>
+</div>
+
+<!-- OVERLAY (ready / pause / dead / win) -->
+<div id="overlay" class="screen hidden">
+  <div class="ov-box">
+    <div id="ovTitle">PAUSED</div>
+    <div id="ovSub"></div>
+    <div id="ovStats"></div>
+    <div class="ov-btns">
+      <button id="ovMain" class="btn">RESUME</button>
+      <button id="ovLobby" class="btn ghost">BACK TO LOBBY</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/three-bundle.js"></script>
+<script src="js/soldier-data.js"></script>
+<script src="js/game.js"></script>
+</body>
+</html>
